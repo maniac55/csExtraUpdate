@@ -1,0 +1,317 @@
+<html>
+<head>
+   <title>Pong Game</title>
+   <style>
+      #canvas {
+        position: absolute;
+        top:0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin:auto;
+      }
+   </style>
+</head>
+<body>
+   <canvas id='canvas' width='800' height='600' />
+   <script>
+   
+      const canvas = document.getElementById("canvas");
+	  const context = canvas.getContext("2d");
+	  
+	  
+	  
+	  const floorY   = 580;
+	  const ceilingY = 0;
+	  const wallL    = 0;
+	  const wallR    = 780;
+	  const audioOne = new Audio('https://d1u5p3l4wpay3k.cloudfront.net/dota2_gamepedia/e/eb/Crowd_lv_01.wav');
+	  const audioTwo = new Audio('https://d1u5p3l4wpay3k.cloudfront.net/dota2_gamepedia/0/02/Crowd_lv_02.wav');
+	  const impactOne  = new Audio('https://d1u5p3l4wpay3k.cloudfront.net/dota2_gamepedia/7/70/Split_Shot_projectile_launch1.mp3');
+	  const impactTwo  = new Audio('https://d1u5p3l4wpay3k.cloudfront.net/dota2_gamepedia/c/c2/Split_Shot_projectile_launch2.mp3');
+	  const impactWall = new Audio('https://d1u5p3l4wpay3k.cloudfront.net/dota2_gamepedia/f/f0/Medusa_projectile_launch2.mp3');
+	  
+	  
+	  
+	  const ball = {
+	  	x      : 391,
+		y      : 290,
+		width  : 20,
+		height : 20,
+		color  : 'white',
+		xDelta: 0,
+        yDelta: 0
+	  };
+	  
+	  const playerOne = { //player on the left
+	  	x      : 10,
+		y      : 250,
+		width  : 15,
+		height : 125,
+		color  : 'Silver',
+		xDelta : 0,
+        yDelta : 0,
+		moveUp: false,
+		moveDown: false
+	  };
+	  
+	  const playerTwo = { //player on the right
+	  	x      : 775,
+		y      : 250,
+		width  : 15,
+		height : 125,
+		color  : 'Silver',
+		xDelta : 0,
+        yDelta : 0,
+		moveUp: false,
+		moveDown: false
+	  };
+	  
+	  const score = {
+	  	scoreOne : 0,
+		scoreTwo : 0
+	  }
+	  
+	  
+	  const gameOverRestart = function() {
+	  	if(score.scoreOne >= 5){
+			alert("Player One won!")
+			ball.x = 391;
+			ball.y = 290;
+			playerOne.x = 10;
+			playerOne.y = 250;
+			playerTwo.x = 775;
+			playerTwo.y = 250;
+			score.scoreOne = 0;
+			score.scoreTwo = 0;
+		}
+		else if(score.scoreTwo >= 5) {
+			alert("Player Two won!")
+			ball.x = 391;
+			ball.y = 290;
+			playerOne.x = 10;
+			playerOne.y = 250;
+			playerTwo.x = 775;
+			playerTwo.y = 250;
+			score.scoreOne = 0;
+			score.scoreTwo = 0;
+		}
+		else if(score.scoreOne === 4 && score.scoreTwo === 4) {
+			score.scoreOne = 3;
+			score.scoreTwo = 3;
+		}
+	  }
+	  
+	  
+	  const draw = function() {
+	    context.fillStyle = 'black';
+		context.fillRect(0, 0, 800, 600);
+		
+		context.fillStyle = 'grey'; 
+		context.fillRect(400, 0, 2, 600);
+		
+		context.font="15px Impact";
+        context.fillText(
+		"        w,s uparrow,downarrow = move                                    g = start the game at normal speed" +
+		"                                    4,5,6 = pause,slow,fast start"
+		, 0, 590);
+		
+		context.font="20px Impact";
+		context.fillStyle = 'AliceBlue';
+        context.fillText("Player One", 0, 20);
+		
+		context.font="20px Impact";
+		context.fillStyle = 'AliceBlue';
+        context.fillText("Player Two", 710, 20);
+		
+		context.font="20px Impact";
+		context.fillStyle = 'AliceBlue';
+        context.fillText("Score:", 300, 20);
+		
+		context.font="20px Impact";
+		context.fillStyle = 'AliceBlue';
+		context.fillText(score.scoreOne, 370, 20);
+		
+		context.font="20px Impact";
+		context.fillStyle = 'AliceBlue';
+		context.fillText(score.scoreTwo, 420, 20);
+		
+		context.beginPath();
+        context.arc(400, 300, 150, 0,2*Math.PI);
+		context.strokeStyle = 'grey'
+        context.stroke();
+	  
+	  	context.fillStyle = ball.color;
+		context.fillRect(ball.x, ball.y, ball.width, ball.height);
+		
+		context.fillStyle = playerOne.color;
+		context.fillRect(playerOne.x, playerOne.y, playerOne.width, playerOne.height);
+		
+		context.fillStyle = playerTwo.color;
+		context.fillRect(playerTwo.x, playerTwo.y, playerTwo.width, playerTwo.height);
+	  };
+	  
+	  
+	  
+	  const updateData = function() {
+	  
+	    ball.x = ball.x + ball.xDelta;
+        ball.y = ball.y + ball.yDelta;
+		
+		
+        if (ball.y >= floorY || ball.y <= ceilingY) {
+           ball.yDelta = -ball.yDelta;
+		   impactWall.play();
+        }
+		
+		
+		if(ball.x <= playerTwo.x + playerTwo.width && ball.x + ball.width >= playerTwo.x && ball.y <= playerTwo.y + playerTwo.height && ball.y + ball.height >= playerTwo.y) {
+		    
+		   	impactOne.play();
+			ball.xDelta = -ball.xDelta;
+		}	   
+		
+		if(ball.x <= playerOne.x + playerOne.width && ball.x + ball.width >= playerOne.x && ball.y <= playerOne.y + playerOne.height && ball.y + ball.height >= playerOne.y) {
+		   	
+			impactTwo.play();
+			ball.xDelta = -ball.xDelta;
+		}
+		
+		if (ball.x >= wallR) { //winner playerone
+		   audioOne.play();
+           //alert("Player number one won! Restarting game...");
+		   score.scoreOne = score.scoreOne + 1;
+		   ball.x = 391;
+		   ball.y = 290;
+		   ball.xDelta = 0;
+		   ball.yDelta = 0;
+        }
+		
+		if (ball.x <= wallL) { //winner playertwo
+		   audioTwo.play();
+		   //alert("Player number two won! Restarting game...");
+		   score.scoreTwo = score.scoreTwo + 1;
+		   ball.x = 391;
+		   ball.y = 290;
+		   ball.xDelta = 0;
+		   ball.yDelta = 0;
+        }
+		
+		if(playerOne.moveUp === true){
+			playerOne.y -= 10;
+		}
+		if(playerOne.moveDown === true){
+			playerOne.y += 10;
+		}
+		if(playerTwo.moveUp === true){
+			playerTwo.y -= 10;
+		}
+		if(playerTwo.moveDown === true){
+			playerTwo.y += 10;
+		}
+		
+	    if(playerOne.y <= ceilingY) {
+        	playerOne.y = ceilingY;
+		}
+		
+		if(playerOne.y + playerOne.height >= floorY) {
+        	playerOne.y = floorY-playerOne.height;
+		}
+		if(playerTwo.y <= ceilingY) {
+        	playerTwo.y = ceilingY;
+		}
+		if(playerTwo.y + playerTwo.height >= floorY) {
+        	playerTwo.y = floorY-playerTwo.height;
+		}		
+		
+	  }
+	  
+	  
+	  
+	  const run = function(){
+        draw();
+        updateData();
+		gameOverRestart();
+        requestAnimationFrame(run);
+      };
+	  
+	  
+	  
+	  run();
+	  
+	  
+	  
+	  const upKeyOne   = 87;   //player one key = w
+	  const downKeyOne = 83;   //player one key = s
+	  
+	  const upKeyTwo   = 38;   //player two key = up arrow
+	  const downKeyTwo = 40;   //player two key = down arrow
+	  
+	  const speedDown  = 53;   //5 , slow speed
+	  const speedUp    = 54;   //6 , fast speed
+	  const pauseKey    = 52;  //4 , pause
+	  
+	  const startBall  = 71;   //g , back to normal speed
+	  
+	  
+	  
+	  document.addEventListener('keydown', function(event) {
+ 
+	    if(event.keyCode === upKeyOne) {
+            playerOne.moveUp = true;
+        }
+		else if (event.keyCode === downKeyOne) {
+			playerOne.moveDown = true;
+		}
+		
+		if(event.keyCode === upKeyTwo) {
+            playerTwo.moveUp = true;
+		    
+        }
+		else if (event.keyCode === downKeyTwo) {
+			playerTwo.moveDown = true;
+		}
+		
+		if(event.keyCode === speedDown) {
+			ball.xDelta = 1.5;
+		    ball.yDelta = 2.5;
+		}
+		
+		if(event.keyCode === speedUp) {
+			ball.xDelta = 6;
+		    ball.yDelta = 10;
+		}
+		
+		if(event.keyCode === pauseKey) {
+			ball.xDelta = 0;
+		    ball.yDelta = 0;
+		}
+		
+		if(event.keyCode === startBall) {
+			ball.yDelta = 5;
+			ball.xDelta = 3;
+			}
+		   
+      }, false);
+	  document.addEventListener('keyup', function(event) {
+	  
+	  	if(event.keyCode === upKeyOne) {
+            playerOne.moveUp = false;
+        }
+		else if (event.keyCode === downKeyOne) {
+			playerOne.moveDown = false;
+		}
+		
+		if(event.keyCode === upKeyTwo) {
+            playerTwo.moveUp = false;
+		    
+        }
+		else if (event.keyCode === downKeyTwo) {
+			playerTwo.moveDown = false;
+		}
+		
+	  }, false);
+	  
+   </script>
+</body>
+</html>
